@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JayTVMedia | Movie Details</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg: #f4f4f4;
+        --text: #222;
+        --accent: #ff0055;
+        --glass: rgba(255, 255, 255, 0.1);
+      }
+
+      body.dark {
+        --bg: #121212;
+        --text: #eee;
+        --glass: rgba(0, 0, 0, 0.3);
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        transition: background 0.3s, color 0.3s;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      header h1 {
+        color: var(--accent);
+        font-size: 1.6rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      .toggle {
+        cursor: pointer;
+        font-size: 1.2rem;
+        background: none;
+        border: none;
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+        background: var(--glass);
+        border-radius: 20px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(14px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 0.6s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .poster {
+        width: 100%;
+        max-width: 340px;
+        border-radius: 14px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        margin-bottom: 24px;
+        transition: transform 0.3s ease;
+      }
+
+      .poster:hover {
+        transform: scale(1.05);
+      }
+
+      .info {
+        text-align: center;
+        padding: 0 20px;
+      }
+
+      .info h2 {
+        font-size: 2.4rem;
+        margin-bottom: 12px;
+        color: var(--accent);
+      }
+
+      .info p {
+        margin: 8px 0;
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .info i {
+        margin-right: 8px;
+        color: var(--accent);
+      }
+
+      .downloads {
+        margin-top: 30px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .downloads button {
+        padding: 14px 22px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        background: var(--accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: transform 0.3s ease, background 0.3s ease;
+      }
+
+      .downloads button:hover {
+        background: #cc0044;
+        transform: scale(1.05);
+      }
+
+      footer {
+        background: var(--bg);
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid #ccc;
+        margin-top: 40px;
+      }
+
+      footer p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+
+      @media (max-width: 768px) {
+        .info h2 {
+          font-size: 1.8rem;
+        }
+
+        .info p {
+          font-size: 0.95rem;
+        }
+
+        .downloads {
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .poster {
+          max-width: 90%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .info h2 {
+          font-size: 1.5rem;
+        }
+
+        .info p {
+          font-size: 0.9rem;
+        }
+
+        .downloads button {
+          font-size: 0.95rem;
+          padding: 12px 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a
+          href="index.html"
+          style="text-decoration: none; color: var(--accent)"
+        >
+          <i class="fas fa-tv"></i> JayTVMedia
+        </a>
+      </h1>
+      <button class="toggle" onclick="toggleTheme()">
+        <i class="fas fa-adjust"></i>
+      </button>
+    </header>
+
+    <div class="container" id="movieContainer">
+      <p>Loading movie details...</p>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 JayTVMedia | Powered by OMDb & Telegram</p>
+    </footer>
+
+    <script>
+      function toggleTheme() {
+        document.body.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          document.body.classList.contains("dark") ? "dark" : "light"
+        );
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem("theme") === "dark") {
+          document.body.classList.add("dark");
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const imdbID = params.get("imdbID");
+        const container = document.getElementById("movieContainer");
+
+        if (!imdbID) {
+          container.innerHTML = "<p>Movie ID not found.</p>";
+          return;
+        }
+
+        fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=acd5a4e0`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.Response === "False") {
+              container.innerHTML = "<p>Movie not found.</p>";
+              return;
+            }
+
+            container.innerHTML = `
+            <img class="poster" src="${
+              data.Poster !== "N/A"
+                ? data.Poster
+                : "https://via.placeholder.com/300x450?text=No+Image"
+            }" alt="${data.Title}">
+            <div class="info">
+              <h2>${data.Title} (${data.Year})</h2>
+              <p><i class="fas fa-tags"></i> <strong>Genre:</strong> ${
+                data.Genre
+              }</p>
+              <p><i class="fas fa-user"></i> <strong>Director:</strong> ${
+                data.Director
+              }</p>
+              <p><i class="fas fa-star"></i> <strong>Rating:</strong> ${
+                data.imdbRating
+              }</p>
+              <p><i class="fas fa-align-left"></i> <strong>Plot:</strong> ${
+                data.Plot
+              }</p>
+              <p><i class="fas fa-file-download"></i> <strong>Download Size:</strong> 1.2 GB</p>
+            </div>
+            <div class="downloads">
+              <button onclick="alert('Web download coming soon')"><i class="fas fa-globe"></i> Web Download</button>
+              <button onclick="window.open('https://t.me/yourchannel', '_blank')"><i class="fab fa-telegram"></i> Telegram Download</button>
+            </div>
+          `;
+          })
+          .catch(() => {
+            container.innerHTML = "<p>Error loading movie details.</p>";
+          });
+      };
+    </script>
+  </body>
+</html>
